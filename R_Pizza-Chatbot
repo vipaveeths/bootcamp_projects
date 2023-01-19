@@ -1,0 +1,107 @@
+# homework 01
+# chatbot (rule-based)
+# ordering pizza
+
+#greeting
+print("Welcome to Pizza House!")
+
+
+#1. asking for a name
+name <- readline("What is your name?: ")
+print(paste("Hi!", name))
+
+
+#2. action choice // **choices and options for refund and complaints are not yet developed
+print("How can we help you today?")
+print("1. order our pizza! 2. get a refund 3. send complaints")
+choice <- readline("select number: ")
+if(choice == "1") {
+  print("order our pizza!")
+} else {
+  if(choice == "2") {
+    print("get a refund")
+  } else {
+    print("send complaints")
+  }
+}
+
+
+#3. which topping
+if(choice == 1){
+  amount <- 0
+  while(amount<6) {
+    print("Which pizza topping would you like?")
+    print("1. BBQ Bacon Pizza")
+    print("2. Beef and Mushroom Pizza")
+    print("3. Cheese and Bacon Pizza")
+    print("4. Sweet Chili Pizza")
+    
+    topping <- readline("select number: ")
+    
+    
+    #4. size
+    print("Great choice!")
+    print("Which size would you like?")
+    print("S")
+    print("M")
+    print("L")
+    size <- readline("select size: ")
+    
+    
+    #5. amount of order
+    print("Got it!")
+    print("How many of this would you like?")
+    new_amount <- as.numeric(readline("Amount of order: "))
+    amount <- amount + new_amount
+    
+    if (amount > 5){
+      print("We're extremely sorry. We limit to only 5 pizzas per order.")
+    }
+    
+    print("Would you like to order another pizza?")
+    print("1. Yes")
+    print("2. No")
+    anotherpizza <- readline("select number: ")
+    if(anotherpizza == "2"){
+      amount <- amount - new_amount
+      break}
+  }
+  
+  
+  #5. pick-up choice
+  if(amount < 6) {{
+    print("Would you like it delivered?")
+    print("1. Yup!")
+    print("2. No, I will pick it up by myself.")
+    pickup <- readline("select number: ")
+    print("Got it!")}
+    
+    
+    #6. address
+    if(pickup == 1) {
+      print("Please put in your address")
+      address <- readline("select number: ")
+    } else {
+      print("Please put in the branch you would like to pick up")
+      address <- readline("select number: ")
+    }
+    
+    #7 time
+    if(pickup == 1){
+      print("Thank you! We are preparing your order and will be at your door in an hour!")
+    } else {
+      print("Thank you! Please drop by in an hour to get your order!")
+    }
+    
+    #8 rate satisfaction
+    print("How satisfied are you with the order process from 1 to 10?")
+    satisfaction <- as.numeric(readline("rate: "))
+    {if(satisfaction > 5) {
+      print("Thank you for your feedback! If you have any suggestions, please feel free to provide us your comments!")
+      feedback <- readline("Type your comment: ")
+    } else {
+      print("We are sorry that our service is unsatisfactory. If possible, please provide us feedback so that we could improve our service.")
+      feedback <- readline("Type your comment: ")
+    }}
+  }
+}
