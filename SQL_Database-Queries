@@ -1,0 +1,192 @@
+/* 5 tables
+1 Fact, 4 dimension
+3-5 queries
+1 subquery with*/
+
+
+-- dim table 1
+CREATE TABLE menu (
+  menu_id INT PRIMARY KEY,
+  menu_name TEXT,
+  menu_price INT
+);
+
+INSERT INTO menu VALUES
+  (1, 'Hamburger', 8),
+  (2, 'BaconCheeseburger', 20),
+  (3, 'MacnCheeseBurger', 22),
+  (4, 'DoubleEggBurger', 11);
+
+.mode column
+.header ON
+
+SELECT * FROM menu;
+
+
+-- dim table 2
+CREATE TABLE customers (
+  customer_id INT PRIMARY KEY,
+  customer_firstname TEXT,
+  customer_lastname TEXT,
+  customer_gender TEXT
+);
+
+INSERT INTO customers VALUES
+  (1, 'Namjoon', 'Kim', 'male'),
+  (2, 'Seokjin', 'Kim', 'male'),
+  (3, 'Yoongi', 'Min', 'male'),
+  (4, 'Wonyoung', 'Jang', 'female');
+
+.mode column
+.header ON
+SELECT * FROM customers;
+
+
+-- dim table 3
+CREATE TABLE customersmenu (
+  order_id INT PRIMARY KEY,
+  customer_id INT,
+  order_date DATE,
+  order_menu TEXT
+);
+
+INSERT INTO customersmenu VALUES
+  (1, 1, 20221201, 'BaconCheeseburger'),
+  (2, 1, 20221202, 'Hamburger'),
+  (3, 3, 20221203, 'DoubleEggBurger'),
+  (4, 2, 20221203, 'BaconCheeseburger'),
+  (5, 4, 20221204, 'MacnCheeseBurger'),
+  (6, 1, 20221205, 'DoubleEggBurger'),
+  (7, 1, 20221206, 'Hamburger'),
+  (8, 3, 20221206, 'MacnCheeseBurger'),
+  (9, 2, 20221208, 'BaconCheeseburger'),
+  (10, 4, 20221210, 'MacnCheeseBurger');
+
+.mode column
+.header ON
+
+SELECT * FROM customersmenu;
+
+
+-- dim table 4
+CREATE TABLE invoices (
+  invoice_id INT PRIMARY KEY,
+  order_id INT,
+  order_price REAL,
+  payment TEXT
+);
+
+INSERT INTO invoices VALUES 
+  (1, 1, 20, 'cash'),
+  (2, 2, 8, 'credit'),
+  (3, 3, 11, 'cash'),
+  (4, 4, 20, 'credit'),
+  (5, 5, 22, 'credit'),
+  (6, 6, 11, 'credit'),
+  (7, 7, 8, 'credit'),
+  (8, 8, 22, 'cash'),
+  (9, 9, 20, 'credit'),
+  (10, 10, 22, 'cash');
+
+.mode column
+.header on
+
+SELECT * FROM invoices;
+
+
+-- fact table
+
+CREATE TABLE orders (
+  order_id INT PRIMARY KEY,
+  invoice_id INT,
+  customer_id INT,
+  order_menu INT,
+  order_price REAL,
+  payment TEXT,
+    FOREIGN KEY (invoice_id) REFERENCES invoices (invoice_id),
+    FOREIGN KEY (customer_id) REFERENCES customers (customer_id),
+    FOREIGN KEY (order_menu) REFERENCES customersmenu (order_menu),
+    FOREIGN KEY (order_price) REFERENCES invoices (order_price),
+    FOREIGN KEY (payment) REFERENCES invoices (payment)
+);
+
+INSERT INTO orders VALUES
+  (1, 1, 1, 'BaconCheeseburger', 20.0, 'cash'),
+  (2, 2, 1, 'Hamburger', 8.0, 'credit'),
+  (3, 3, 3, 'DoubleEggBurger', 11.0, 'cash'),
+  (4, 4, 2, 'BaconCheeseburger', 20.0, 'credit'),
+  (5, 5, 4, 'MacnCheeseBurger', 22.0, 'credit'),
+  (6, 6, 1, 'DoubleEggBurger', 11.0, 'credit'),
+  (7, 7, 1, 'Hamburger', 8.0, 'credit'),
+  (8, 8, 3, 'MacnCheeseBurger', 22.0, 'cash'),
+  (9, 9, 2, 'BaconCheeseburger', 20.0, 'credit'),
+  (10, 10, 4, 'MacnCheeseBurger', 22.0, 'cash')
+;
+
+.mode column
+.header on
+
+SELECT * FROM orders;
+
+-- ANALYSIS --
+
+-- query 1: total price of each customer's orders --
+
+
+WITH customer_all_orders AS (
+  SELECT *
+  FROM orders
+  JOIN customers
+  ON orders.customer_id = customers.customer_id
+  )
+SELECT
+    customer_firstname || ' ' || customer_lastname AS customer_name,
+    SUM(order_price) AS total_price
+  FROM customer_all_orders
+GROUP BY 1
+ORDER BY 2 DESC;
+
+
+-- query 2: Top 3 best sold selling menu
+
+SELECT
+  order_menu,
+  COUNT(order_menu) AS amount_ordered
+FROM orders
+GROUP BY 1
+ORDER BY 2 desc
+LIMIT 3;
+
+
+-- query 3: number of times each customer ordered - which customer made most orders?
+
+WITH customer_all_orders as (
+  SELECT *
+  FROM orders
+  JOIN customers
+  ON orders.customer_id = customers.customer_id)
+SELECT
+  customer_firstname || ' ' || customer_lastname AS customer_name,
+  COUNT(customer_id) AS n_orders
+FROM customer_all_orders
+GROUP BY 1
+ORDER BY 2 DESC;
+
+
+-- query 4: which menu made the most earnings?
+
+SELECT 
+  order_menu,
+  SUM(order_price) AS total_earnings
+FROM orders
+GROUP BY 1
+ORDER BY 2 DESC;
+
+-- query 5: what's most used payment method?
+
+SELECT
+  payment,
+  COUNT(payment)
+FROM orders
+GROUP BY 1
+ORDER BY 2 DESC;
